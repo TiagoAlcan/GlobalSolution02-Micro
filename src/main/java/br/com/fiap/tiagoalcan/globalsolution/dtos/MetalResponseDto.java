@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MetalRequestCreateDto {
+public class MetalResponseDto {
+    private Long id;
     private String nome;
     private String descricao;
     private String propriedades;
