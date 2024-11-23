@@ -1,15 +1,15 @@
 package br.com.fiap.tiagoalcan.globalsolution.service;
 
+import br.com.fiap.tiagoalcan.globalsolution.dtos.MetalResponseDto;
 import br.com.fiap.tiagoalcan.globalsolution.dtos.MetalRequestCreateDto;
 import br.com.fiap.tiagoalcan.globalsolution.dtos.MetalRequestUpdateDto;
-import br.com.fiap.tiagoalcan.globalsolution.dtos.MetalResponseDto;
 import br.com.fiap.tiagoalcan.globalsolution.mapper.MetalMapper;
 import br.com.fiap.tiagoalcan.globalsolution.model.Metal;
 import br.com.fiap.tiagoalcan.globalsolution.repository.MetalRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +23,7 @@ public class MetalService {
     @Autowired
     private MetalMapper mapper;
 
-    
+    @Transactional(readOnly = true)
     public List<MetalResponseDto> findAll() {
         return repository.findAll()
                 .stream()
@@ -31,14 +31,14 @@ public class MetalService {
                 .collect(Collectors.toList());
     }
 
-    
+    @Transactional(readOnly = true)
     public MetalResponseDto findById(Long id) {
         return repository.findById(id)
                 .map(mapper::toResponseDto)
                 .orElseThrow(() -> new EntityNotFoundException("Metal não encontrado com ID: " + id));
     }
 
-    
+    @Transactional(readOnly = true)
     public List<MetalResponseDto> findByNome(String nome) {
         return repository.findByNomeContainingIgnoreCase(nome)
                 .stream()
@@ -48,7 +48,6 @@ public class MetalService {
 
     @Transactional
     public MetalResponseDto save(MetalRequestCreateDto createDto) {
-        validateCreateDto(createDto);
         Metal metal = mapper.toEntity(createDto);
         Metal savedMetal = repository.save(metal);
         return mapper.toResponseDto(savedMetal);
@@ -70,23 +69,5 @@ public class MetalService {
             throw new EntityNotFoundException("Metal não encontrado com ID: " + id);
         }
         repository.deleteById(id);
-    }
-
-    private void validateCreateDto(MetalRequestCreateDto dto) {
-        if (dto == null) {
-            throw new IllegalArgumentException("O DTO não pode ser nulo");
-        }
-        if (dto.getNome() == null || dto.getNome().trim().isEmpty()) {
-            throw new IllegalArgumentException("O nome é obrigatório");
-        }
-        if (dto.getDescricao() == null || dto.getDescricao().trim().isEmpty()) {
-            throw new IllegalArgumentException("A descrição é obrigatória");
-        }
-        if (dto.getPropriedades() == null || dto.getPropriedades().trim().isEmpty()) {
-            throw new IllegalArgumentException("As propriedades são obrigatórias");
-        }
-        if (dto.getFuncao() == null || dto.getFuncao().trim().isEmpty()) {
-            throw new IllegalArgumentException("A função é obrigatória");
-        }
     }
 }
